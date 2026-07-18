@@ -17,24 +17,24 @@
 <div id="root"></div>
 <script type="text/babel">
 const { useState, useEffect, useRef } = React;
-
+ 
 const SB_URL = "https://fovdszarkfmwyvnhjgth.supabase.co";
 const SB_KEY = "sb_publishable_GtZV5uIWe02PMLxdlj36JA_c4l0T3Pt";
-
+ 
 const MANAGER_PIN = "0784";
-
+ 
 const PAYMENT = {
   venmo:  { handle: "@justin-nymark",        url: "https://venmo.com/u/justin-nymark" },
   paypal: { email:  "justinnymark@gmail.com", url: "https://www.paypal.com/qrcodes/managed/09cb5692-c0e2-4857-acda-40e1b3d1ac7d?payment_type=personal" },
   zelle:  { phone:  "727-295-5333" },
 };
-
+ 
 const MANAGER = { name:"Justin Nymark", title:"Team Manager", phone:"727-295-5333", email:"justinnymark@gmail.com" };
 const COACHES = {
   1: { name:"Jason Montoya", title:"Head Coach", phone:"727-455-9543", email:"jasjmontoya@gmail.com" },
   2: { name:"Austin Lee",    title:"Head Coach", phone:"727-418-0195", email:"austinlee1023@gmail.com" },
 };
-
+ 
 const sb = async (path, opts={}) => {
   const res = await fetch(`${SB_URL}/rest/v1${path}`, {
     method: opts.method||"GET",
@@ -44,11 +44,11 @@ const sb = async (path, opts={}) => {
   if (!res.ok) throw new Error(await res.text());
   return res.status===204 ? null : res.json();
 };
-
+ 
 const fmt = (n) => `$${Number(n||0).toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:0})}`;
 const fmt2 = (n) => `$${Number(n||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}`;
 const genId = () => `${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
-
+ 
 function App() {
   const [teams,        setTeams]        = useState({});
   const [budgets,      setBudgets]      = useState({1:[],2:[]});
@@ -63,7 +63,7 @@ function App() {
   const [showPin,      setShowPin]      = useState(false);
   const [pinError,     setPinError]     = useState(false);
   const [saving,       setSaving]       = useState(false);
-
+ 
   const loadData = async () => {
     try {
       const [teamsData, budgetData, playerData, txData] = await Promise.all([
@@ -93,14 +93,14 @@ function App() {
     } catch(e) { setLoadErr(true); }
     setLoaded(true);
   };
-
+ 
   useEffect(() => { loadData(); }, []);
-
+ 
   const team   = teams[activeTeam]||{};
   const budget = budgets[activeTeam]||[];
   const roster = rosters[activeTeam]||[];
   const txList = transactions[activeTeam]||[];
-
+ 
   const totalBudget     = budget.reduce((s,i)=>s+(Number(i.actual)||Number(i.estimated)||0),0);
   const rawPerPlayer    = team.player_count>0 ? totalBudget/team.player_count : 0;
   const chargePerPlayer = team.player_count>0&&team.round_to>0 ? Math.ceil(rawPerPlayer/team.round_to)*team.round_to : 0;
@@ -111,7 +111,7 @@ function App() {
   const countPaid       = roster.filter(p=>p.status==="Paid").length;
   const countPartial    = roster.filter(p=>p.status==="Partial").length;
   const countUnpaid     = roster.filter(p=>p.status==="Unpaid").length;
-
+ 
   // Manager actions
   const logPayment = async (playerId, playerName, parentName, amount, method) => {
     setSaving(true);
@@ -126,13 +126,13 @@ function App() {
     } catch(e) { alert("Save failed: "+e.message); }
     setSaving(false);
   };
-
+ 
   const tryManagerLogin = () => {
     const entered = pinInput.trim().replace(/\s/g, "");
     if (entered === MANAGER_PIN) { setMode("manager"); setShowPin(false); setPinInput(""); setPinError(false); }
     else { setPinError(true); setPinInput(""); }
   };
-
+ 
   const KPI = ({label,value,sub,accent,warn}) => (
     <div className={`rounded-2xl p-4 ${accent?"bg-green-800 text-white":warn?"bg-amber-50 border border-amber-200":"bg-white border border-green-100"}`}>
       <div className={`text-xs font-semibold uppercase tracking-wide mb-1 ${accent?"text-green-300":warn?"text-amber-600":"text-green-700"}`}>{label}</div>
@@ -140,13 +140,13 @@ function App() {
       {sub&&<div className={`text-xs mt-0.5 ${accent?"text-green-300":"text-gray-400"}`}>{sub}</div>}
     </div>
   );
-
+ 
   const Badge = ({status}) => {
     const s={Paid:"bg-green-100 text-green-800",Partial:"bg-amber-100 text-amber-800",Unpaid:"bg-red-100 text-red-700"};
     return React.createElement('span',{className:`text-xs font-bold px-2.5 py-0.5 rounded-full ${s[status]||s.Unpaid}`},
       status==="Paid"?"✓ Paid":status==="Partial"?"½ Partial":"✗ Unpaid");
   };
-
+ 
   const DashboardTab = () => (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
@@ -185,11 +185,11 @@ function App() {
       )}
     </div>
   );
-
-  const GROUP_ORDER = ["Tourney Fees","Ref Fees","Camera Fees","Equipment Fees","Coach Reimbursement","UPSL Fees","Miscellaneous"];
+ 
+  const GROUP_ORDER = ["Tourney Fees","Ref Fees","Camera Fees","Equipment Fees","Coach Reimbursement","Miscellaneous"];
   const [openGroups, setOpenGroups] = React.useState(new Set(["Tourney Fees"]));
   const toggleGroup = (g) => setOpenGroups(prev => { const n=new Set(prev); n.has(g)?n.delete(g):n.add(g); return n; });
-
+ 
   const BudgetTab = () => {
     const groups = GROUP_ORDER.filter(g => budget.some(b => b.category === g));
     const categoryKeywords = {
@@ -268,11 +268,11 @@ function App() {
       </div>
     );
   };
-
+ 
   const [payingPlayer, setPayingPlayer] = useState(null);
   const [payAmount, setPayAmount] = useState("");
   const [payMethod, setPayMethod] = useState("Venmo");
-
+ 
   const RosterTab = () => (
     <div className="space-y-2.5">
       <div className="flex justify-between items-center px-1 mb-1">
@@ -302,7 +302,7 @@ function App() {
           </div>
         );
       })}
-
+ 
       {/* Log payment modal */}
       {payingPlayer&&(
         <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50" onClick={()=>setPayingPlayer(null)}>
@@ -339,7 +339,7 @@ function App() {
       )}
     </div>
   );
-
+ 
   const PayTab = () => (
     <div className="space-y-4">
       <div className="bg-green-800 text-white rounded-2xl p-4 text-center">
@@ -370,7 +370,7 @@ function App() {
       </div>
     </div>
   );
-
+ 
   const ContactCard = ({person,accent}) => (
     <div className={`rounded-2xl p-4 ${accent?"bg-green-800 text-white":"bg-white border border-green-100"}`}>
       <div className={`text-xs font-bold uppercase tracking-wide mb-1 ${accent?"text-green-300":"text-green-700"}`}>{person.title}</div>
@@ -381,7 +381,7 @@ function App() {
       </div>
     </div>
   );
-
+ 
   const ContactsTab = () => (
     <div className="space-y-3">
       <div className="text-xs font-semibold text-green-800 uppercase tracking-wide px-1">Team Management</div>
@@ -397,7 +397,7 @@ function App() {
       </div>
     </div>
   );
-
+ 
   const TABS = [
     {id:"dashboard", label:"Summary",  icon:"📊"},
     {id:"budget",    label:"Budget",   icon:"💰"},
@@ -405,7 +405,7 @@ function App() {
     {id:"pay",       label:"Pay",      icon:"💳"},
     {id:"contacts",  label:"Contacts", icon:"📋"},
   ];
-
+ 
   if (!loaded) return (
     <div className="flex items-center justify-center min-h-screen bg-green-50">
       <div className="text-center text-green-800">
@@ -414,7 +414,7 @@ function App() {
       </div>
     </div>
   );
-
+ 
   if (loadErr) return (
     <div className="flex items-center justify-center min-h-screen bg-green-50">
       <div className="text-center text-gray-600 px-8">
@@ -425,7 +425,7 @@ function App() {
       </div>
     </div>
   );
-
+ 
   return (
     <div className="min-h-screen bg-green-50 max-w-lg mx-auto">
       {/* PIN Modal */}
@@ -443,7 +443,7 @@ function App() {
           </div>
         </div>
       )}
-
+ 
       <div className="bg-green-800 px-4 pt-6 pb-3">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2.5">
@@ -461,9 +461,9 @@ function App() {
           </div>
         </div>
       </div>
-
-
-
+ 
+ 
+ 
       <div className="flex bg-white border-b border-green-100 sticky top-0 z-10">
         {TABS.map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)}
@@ -472,7 +472,7 @@ function App() {
           </button>
         ))}
       </div>
-
+ 
       <div className="px-4 py-4 pb-24">
         {tab==="dashboard" &&<DashboardTab/>}
         {tab==="budget"    &&<BudgetTab/>}
@@ -480,14 +480,14 @@ function App() {
         {tab==="pay"       &&<PayTab/>}
         {tab==="contacts"  &&<ContactsTab/>}
       </div>
-
+ 
       <div className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white border-t border-green-100 px-4 py-2">
         <p className="text-xs text-center text-gray-400">Florida Celtic SC · Live data</p>
       </div>
     </div>
   );
 }
-
+ 
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
 </script>
 </body>
