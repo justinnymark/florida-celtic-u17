@@ -1,0 +1,23 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    - cron: '0 12 */3 * *'  # Runs every 3 days at noon UTC
+  workflow_dispatch:          # Allows manual trigger from GitHub if needed
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Florida Celtic SC Supabase
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: sb_publishable_GtZV5uIWe02PMLxdlj36JA_c4l0T3Pt" \
+            -H "Authorization: Bearer sb_publishable_GtZV5uIWe02PMLxdlj36JA_c4l0T3Pt" \
+            "https://fovdszarkfmwyvnhjgth.supabase.co/rest/v1/teams?select=id&limit=1")
+          echo "Supabase ping status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "Warning: Supabase returned status $STATUS"
+            exit 1
+          fi
+          echo "Supabase is alive!"
