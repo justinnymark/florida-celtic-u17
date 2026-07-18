@@ -1,3 +1,5 @@
+
+Florida celtic u17 · HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -279,7 +281,7 @@ function App() {
         <span className="text-xs font-semibold text-green-800 uppercase tracking-wide">{roster.length} Players</span>
         {mode==="manager"&&<span className="text-xs text-gray-400">Tap player to log payment</span>}
       </div>
-      {[...roster].sort((a,b)=>({Unpaid:0,Partial:1,Paid:2}[a.status]??0)-({Unpaid:0,Partial:1,Paid:2}[b.status]??0)).map(p=>{
+      {[...roster].sort((a,b)=>a.player_name.localeCompare(b.player_name)).map(p=>{
         const balance=(Number(p.amount_owed)||0)-(Number(p.amount_paid)||0);
         return (
           <div key={p.id} className="bg-white border border-green-100 rounded-2xl px-4 py-3">
